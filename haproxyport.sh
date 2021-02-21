@@ -71,7 +71,7 @@ systemctl stop firewalld.service
 systemctl disable firewalld.service 
 }
 
-conf_look{
+conf_look(){
 cat /etc/haproxy/haproxy.cfg |grep "##"
 }
 
