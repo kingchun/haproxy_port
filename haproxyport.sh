@@ -66,6 +66,9 @@ if [ $? -eq  0 ]; then
 				yum install haproxy -y||apt install haproxy -y
 				confmo
 fi
+
+systemctl stop firewalld.service
+systemctl disable firewalld.service 
 }
 
 conf_look{
