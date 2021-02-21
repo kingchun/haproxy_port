@@ -32,7 +32,7 @@ read  port2
 cat <<EOF>> /etc/haproxy/haproxy.cfg
 frontend ss-in${port}
         bind *:${port}
-        default_backend ss-out
+        default_backend ss-out${port}
 
 backend ss-out${port}
         server server1 ${domain}:${port2} send-proxy
