@@ -14,6 +14,10 @@ if [ $? -eq  0 ]; then
 				yum install lsof -y || apt install lsof -y
 fi
 
+haproxy -v > /dev/null
+if [ $? -eq  0 ]; then
+	            echo "检查到haproxy已安装!"
+fi
 
 status(){
 doiido=$(systemctl status haproxy |grep "running")
