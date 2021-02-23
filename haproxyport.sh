@@ -121,7 +121,7 @@ if [ $? -eq  0 ]; then
 	    else
 				echo "检查到haproxy没有安装现在开始安装!"
 				yum install haproxy -y||apt install haproxy -y
-				confmo
+				conf_mo
 fi
 
 systemctl stop firewalld.service
