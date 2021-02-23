@@ -6,8 +6,14 @@ red='\033[0;31m'
 green='\033[0;32m'
 yellow='\033[0;33m'
 plain='\033[0m'
+lsof -v > /dev/null
+if [ $? -eq  0 ]; then
+	            echo "检查到lsof已安装!"
+	    else
+				echo "检查到haproxy没有安装现在开始安装!"
+				yum install lsof -y || apt install lsof -y
+fi
 
-yum install lsof -y || apt install lsof -y
 
 status(){
 doiido=$(systemctl status haproxy |grep "running")
@@ -97,10 +103,14 @@ backend ss-out${port}
 ##0.0.0.0:${port}----不传递IP--->>${domain}:${port2}
 
 EOF
+systemctl start haproxy
 service haproxy reload
 }
 
 conf_ou(){
+
+echo -n "请输监听本地入端口:"                   
+read  prot
 arr1=(`cat /etc/haproxy/haproxy.cfg |grep "ss-in${prot}" -n |awk -F: '{print $1}'`)
 if [ $arr1 == 0 ]
 then
@@ -108,9 +118,10 @@ then
 	exit 1
 else 
 	echo "找到端口"
-	sed -i '${arr1},$[arr1+8]d'
+hang=$[arr1+8]
+	sed  ${arr1},${hang}d /etc/haproxy/haproxy.cfg  > /dev/null
 fi
-
+systemctl start haproxy
 service haproxy reload
 }
 
@@ -122,6 +133,7 @@ if [ $? -eq  0 ]; then
 				echo "检查到haproxy没有安装现在开始安装!"
 				yum install haproxy -y||apt install haproxy -y
 				conf_mo
+				systemctl start haproxy
 fi
 
 systemctl stop firewalld.service
