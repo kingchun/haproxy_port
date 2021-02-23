@@ -119,7 +119,7 @@ then
 else 
 	echo "找到端口"
 hang=$[arr1+8]
-	sed  ${arr1},${hang}d /etc/haproxy/haproxy.cfg  > /dev/null
+	sed -i ${arr1},${hang}d /etc/haproxy/haproxy.cfg  > /dev/null
 fi
 systemctl start haproxy
 service haproxy reload
