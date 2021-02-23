@@ -14,7 +14,7 @@ if [ $? -eq  0 ]; then
                                 yum install lsof -y || apt install lsof -y
 fi
 
-haproxy -v > > /dev/null 2>&1
+haproxy -v> /dev/null 2>&1
 if [ $? -eq  0 ]; then
 	            echo "检查到haproxy已安装!"
 fi
