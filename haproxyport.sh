@@ -6,7 +6,7 @@ red='\033[0;31m'
 green='\033[0;32m'
 yellow='\033[0;33m'
 plain='\033[0m'
-lsof -v > > /dev/null 2>&1
+lsof -v > /dev/null 2>&1
 if [ $? -eq  0 ]; then
                     echo "检查到lsof已安装!"
             else
