@@ -6,15 +6,15 @@ red='\033[0;31m'
 green='\033[0;32m'
 yellow='\033[0;33m'
 plain='\033[0m'
-lsof -v > /dev/null
+lsof -v > > /dev/null 2>&1
 if [ $? -eq  0 ]; then
-	            echo "检查到lsof已安装!"
-	    else
-				echo "检查到haproxy没有安装现在开始安装!"
-				yum install lsof -y || apt install lsof -y
+                    echo "检查到lsof已安装!"
+            else
+                                echo "检查到haproxy没有安装现在开始安装!"
+                                yum install lsof -y || apt install lsof -y
 fi
 
-haproxy -v > /dev/null
+haproxy -v > > /dev/null 2>&1
 if [ $? -eq  0 ]; then
 	            echo "检查到haproxy已安装!"
 fi
@@ -45,11 +45,11 @@ EOF
 }
 
 conf_in(){
-echo -n "请输入域名:"                   
-read  domain 
-echo -n "请输监听本地入端口:"                   
+echo -n "请输入域名:"
+read  domain
+echo -n "请输监听本地入端口:"
 read  port
-echo -n "请输远程服务器端口:"                   
+echo -n "请输远程服务器端口:"
 read  port2
 
 lsof -i:${port}
@@ -59,8 +59,8 @@ if [ $var == 0 ]
 then
    echo "检测到本地端口被占用"
    exit 1
-else 
-	echo "端口可以使用"
+else
+        echo "端口可以使用"
 fi
 
 cat <<EOF>> /etc/haproxy/haproxy.cfg
@@ -78,11 +78,11 @@ service haproxy reload
 }
 
 conf_inpo(){
-echo -n "请输入域名:"                   
-read  domain 
-echo -n "请输监听本地入端口:"                   
+echo -n "请输入域名:"
+read  domain
+echo -n "请输监听本地入端口:"
 read  port
-echo -n "请输远程服务器端口:"                   
+echo -n "请输远程服务器端口:"
 read  port2
 
 lsof -i:${port}
@@ -92,8 +92,8 @@ if [ $var == 0 ]
 then
    echo "检测到本地端口被占用"
    exit 1
-else 
-	echo "端口可以使用"
+else
+        echo "端口可以使用"
 fi
 
 cat <<EOF>> /etc/haproxy/haproxy.cfg
@@ -102,7 +102,7 @@ frontend ss-in${port}
         default_backend ss-out${port}
 
 backend ss-out${port}
-        server server1 ${domain}:${port2} 
+        server server1 ${domain}:${port2}
 
 ##0.0.0.0:${port}----不传递IP--->>${domain}:${port2}
 
@@ -112,18 +112,17 @@ service haproxy reload
 }
 
 conf_ou(){
-
-echo -n "请输监听本地入端口:"                   
+echo -n "请输监听本地入端口:"
 read  prot
 arr1=(`cat /etc/haproxy/haproxy.cfg |grep "ss-in${prot}" -n |awk -F: '{print $1}'`)
 if [ $arr1 == 0 ]
 then
     echo "没有找到端口哦"
-	exit 1
-else 
-	echo "找到端口"
+        exit 1
+else
+        echo "找到端口"
 hang=$[arr1+8]
-	sed -i ${arr1},${hang}d /etc/haproxy/haproxy.cfg  > /dev/null
+        sed -i ${arr1},${hang}d /etc/haproxy/haproxy.cfg
 fi
 systemctl start haproxy
 service haproxy reload
@@ -132,16 +131,16 @@ service haproxy reload
 haproxy_install(){
 haproxy -v
 if [ $? -eq  0 ]; then
-	            echo "检查到haproxy已安装!"
-	    else
-				echo "检查到haproxy没有安装现在开始安装!"
-				yum install haproxy -y||apt install haproxy -y
-				conf_mo
-				systemctl start haproxy
+                    echo "检查到haproxy已安装!"
+            else
+                                echo "检查到haproxy没有安装现在开始安装!"
+                                yum install haproxy -y||apt install haproxy -y
+                                conf_mo
+                                systemctl start haproxy
 fi
 
 systemctl stop firewalld.service
-systemctl disable firewalld.service 
+systemctl disable firewalld.service
 }
 
 conf_look(){
