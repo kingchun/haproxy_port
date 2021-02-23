@@ -7,6 +7,18 @@ green='\033[0;32m'
 yellow='\033[0;33m'
 plain='\033[0m'
 
+yum install lsof -y || apt install lsof -y
+
+status(){
+doiido=$(systemctl status haproxy |grep "running")
+#echo $doiido
+if [[ "$doiido" == *running* ]];then
+            echo "haproxy正在运行"
+        else
+                echo "haproxy并没有运行"
+    fi
+}
+
 conf_mo(){
 cat <<EOF> /etc/haproxy/haproxy.cfg
 global
@@ -29,6 +41,18 @@ echo -n "请输监听本地入端口:"
 read  port
 echo -n "请输远程服务器端口:"                   
 read  port2
+
+lsof -i:${port}
+var=$?
+
+if [ $var == 0 ]
+then
+   echo "检测到本地端口被占用"
+   exit 1
+else 
+	echo "端口可以使用"
+fi
+
 cat <<EOF>> /etc/haproxy/haproxy.cfg
 frontend ss-in${port}
         bind *:${port}
@@ -37,7 +61,40 @@ frontend ss-in${port}
 backend ss-out${port}
         server server1 ${domain}:${port2} send-proxy
 
-##0.0.0.0:${port}------->>${domain}:${port2}
+##0.0.0.0:${port}----传递IP--->>${domain}:${port2}
+
+EOF
+service haproxy reload
+}
+
+conf_inpo(){
+echo -n "请输入域名:"                   
+read  domain 
+echo -n "请输监听本地入端口:"                   
+read  port
+echo -n "请输远程服务器端口:"                   
+read  port2
+
+lsof -i:${port}
+var=$?
+
+if [ $var == 0 ]
+then
+   echo "检测到本地端口被占用"
+   exit 1
+else 
+	echo "端口可以使用"
+fi
+
+cat <<EOF>> /etc/haproxy/haproxy.cfg
+frontend ss-in${port}
+        bind *:${port}
+        default_backend ss-out${port}
+
+backend ss-out${port}
+        server server1 ${domain}:${port2} 
+
+##0.0.0.0:${port}----不传递IP--->>${domain}:${port2}
 
 EOF
 service haproxy reload
@@ -73,22 +130,26 @@ systemctl disable firewalld.service
 
 conf_look(){
 cat /etc/haproxy/haproxy.cfg |grep "##"
+
 }
 
 conf_cp(){
 cp /etc/haproxy/haproxy.cfg ~/haproxy.cfg.back
 }
 
+status
+
 echo -e "\033[0;32m ******************** \033[0m"
 echo -e "\033[0;32m **haproxy部署脚本** \033[0m"
 echo -e "\033[0;32m ******************** \033[0m"
 echo -e "\033[0;32m 1.查看配置 \033[0m"
-echo -e "\033[0;32m 2.增加转发 \033[0m"
-echo -e "\033[0;32m 3.删除转发 \033[0m"
-echo -e "\033[0;32m 4.安装haproxy \033[0m"
-echo -e "\033[0;32m 5.备份haproxy配置 \033[0m"
-echo -e "\033[0;32m 6.还原haproxy配置！！！不要乱用 \033[0m"
-echo -e "\033[0;32m 查看状态请输入7 \033[0m"
+echo -e "\033[0;32m 2.增加转发-传递IP \033[0m"
+echo -e "\033[0;32m 3.增加转发不传递IP \033[0m"
+echo -e "\033[0;32m 4.删除转发 \033[0m"
+echo -e "\033[0;32m 5.安装haproxy \033[0m"
+echo -e "\033[0;32m 6.备份haproxy配置 \033[0m"
+echo -e "\033[0;32m 7.还原haproxy配置！！！不要乱用 \033[0m"
+echo -e "\033[0;32m 查看状态请输入8 \033[0m"
 read  -p "请输入选项:" xuanxiang
 ###根据选择执行那个函数###
 case $xuanxiang in
@@ -99,19 +160,22 @@ conf_look
 conf_in
   ;;
  "3")
-conf_ou
+conf_inpo
   ;;
  "4")
+conf_ou
+  ;;
+  "5")
 haproxy_install
 conf_mo
   ;;
-  "5")
+ "6")
 conf_cp
   ;;
- "6")
+  "7")
 conf_mo
   ;;
-  "7")
+  "8")
 systemctl status haproxy
   ;;
  *)
